@@ -2,25 +2,56 @@
 Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
 Sub sample()
-    Dim buf As String
-    Dim j As Integer
+    Dim buf As Variant
+    Dim buf2 As Variant
     Dim CB As New DataObject
-    j = MaxRow()
+    Dim CB_b As Variant
+    CB_b = Application.ClipboardFormats
     
+    'クリップボードの初期化とCBオブジェクトの作成
+    buf = ""
+    buf2 = ""
+    With CB
+        .SetText buf2
+        .PutInClipboard
+        .GetFromClipboard
+    End With
     CB.GetFromClipboard
-    buf2 = CB.GetText
     
+     
+    '以下のループが回っている間にコピーしたものをエクセルに書き起こす
     Do While True
-      buf = CB.GetText
-      Sleep 100
-      If Not buf = buf2 Then
-        j = MaxRow()
-        Cells(j, 1).Value = buf
-        buf2 = buf
+      
+        If image_judgement(CB_b) Then
+          buf2 = "image_reset_9999999"
+          Sleep 500
+        ElseIf CB.GetFormat(1) Then
+          buf = CB.GetText
+          Sleep 500
+        Else
+        End If
+      
+      If buf2 = "image_reset_9999999" Then
+        cell_paste
+        With CB
+         .SetText buf2
+         .PutInClipboard
+        End With
+      ElseIf Not buf = buf2 Then
+        cell_paste
       End If
+      buf2 = buf
       DoEvents
     Loop
 End Sub
+
+
+Function cell_paste()
+    Dim j As Integer
+    j = MaxRow()
+    Cells(j, 1).Select
+    ActiveSheet.Paste
+End Function
 
 Function MaxRow() As Integer
     With ActiveSheet.UsedRange
@@ -28,3 +59,15 @@ Function MaxRow() As Integer
       'MaxCol = .Columns(.Columns.Count).Column
     End With
 End Function
+
+Function image_judgement(ByVal obj_CB_b As Variant) As Boolean
+    image_judgement = False
+    For i = 1 To UBound(obj_CB_b)
+      If obj_CB_b(i) = xlClipboardFormatBitmap Then
+        image_judgement = True
+        Exit For
+      End If
+    Next i
+End Function
+
+
