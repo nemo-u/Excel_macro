@@ -1,10 +1,12 @@
+' required [Microsoft Forms 2.0 Object Library]
 Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
 Sub sample()
     Dim buf As String
     Dim j As Integer
     Dim CB As New DataObject
-    j = 1
+    j = MaxRow()
+    
     CB.GetFromClipboard
     buf2 = CB.GetText
     
@@ -12,10 +14,17 @@ Sub sample()
       buf = CB.GetText
       Sleep 100
       If Not buf = buf2 Then
+        j = MaxRow()
         Cells(j, 1).Value = buf
-        j = j + 1
         buf2 = buf
       End If
       DoEvents
     Loop
 End Sub
+
+Function MaxRow() As Integer
+    With ActiveSheet.UsedRange
+      MaxRow = .Rows(.Rows.Count).Row + 1
+      'MaxCol = .Columns(.Columns.Count).Column
+    End With
+End Function
